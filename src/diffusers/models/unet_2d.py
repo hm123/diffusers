@@ -16,6 +16,7 @@ from typing import Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
+import logging
 
 from ..configuration_utils import ConfigMixin, register_to_config
 from ..utils import BaseOutput
@@ -340,6 +341,7 @@ class UNet2DModel(ModelMixin, ConfigMixin):
             timesteps = timesteps.reshape((sample.shape[0], *([1] * len(sample.shape[1:]))))
             sample = sample / timesteps
 
+        logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
         if not return_dict:
             return (sample,)
 

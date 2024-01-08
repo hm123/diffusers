@@ -15,7 +15,7 @@
 
 from functools import partial
 from typing import Optional, Tuple, Union
-
+import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -256,6 +256,7 @@ class ResnetBlock2D(nn.Module):
             )
 
         output_tensor = (input_tensor + hidden_states) / self.output_scale_factor
+        logging.info(f"{self.__class__.__name__}:shape={output_tensor.shape}")
 
         return output_tensor
 

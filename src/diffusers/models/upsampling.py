@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from typing import Optional, Tuple
-
+import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -69,6 +69,7 @@ class Upsample1D(nn.Module):
 
         if self.use_conv:
             outputs = self.conv(outputs)
+        logging.info(f"{self.__class__.__name__}:shape={outputs.shape}")
 
         return outputs
 

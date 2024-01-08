@@ -23,6 +23,7 @@
 
 from typing import Optional, Tuple, Union
 
+import logging
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -166,7 +167,10 @@ class PatchedLoraProjection(torch.nn.Module):
             self.lora_scale = 1.0
         if self.lora_linear_layer is None:
             return self.regular_linear_layer(input)
-        return self.regular_linear_layer(input) + (self.lora_scale * self.lora_linear_layer(input))
+        ret = self.regular_linear_layer(input) + (self.lora_scale * self.lora_linear_layer(input))
+        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        return ret
+
 
 
 class LoRALinearLayer(nn.Module):
@@ -223,7 +227,9 @@ class LoRALinearLayer(nn.Module):
         if self.network_alpha is not None:
             up_hidden_states *= self.network_alpha / self.rank
 
-        return up_hidden_states.to(orig_dtype)
+        ret = up_hidden_states.to(orig_dtype)
+        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        return ret
 
 
 class LoRAConv2dLayer(nn.Module):
@@ -284,7 +290,9 @@ class LoRAConv2dLayer(nn.Module):
         if self.network_alpha is not None:
             up_hidden_states *= self.network_alpha / self.rank
 
-        return up_hidden_states.to(orig_dtype)
+        ret = up_hidden_states.to(orig_dtype)
+        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        return ret
 
 
 class LoRACompatibleConv(nn.Conv2d):
@@ -355,15 +363,16 @@ class LoRACompatibleConv(nn.Conv2d):
         if self.lora_layer is None:
             # make sure to the functional Conv2D function as otherwise torch.compile's graph will break
             # see: https://github.com/huggingface/diffusers/pull/4315
-            return F.conv2d(
+            ret = F.conv2d(
                 hidden_states, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups
             )
         else:
             original_outputs = F.conv2d(
                 hidden_states, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups
             )
-            return original_outputs + (scale * self.lora_layer(hidden_states))
-
+            ret = original_outputs + (scale * self.lora_layer(hidden_states))
+        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        return ret
 
 class LoRACompatibleLinear(nn.Linear):
     """
@@ -428,7 +437,7 @@ class LoRACompatibleLinear(nn.Linear):
     def forward(self, hidden_states: torch.Tensor, scale: float = 1.0) -> torch.Tensor:
         if self.lora_layer is None:
             out = super().forward(hidden_states)
-            return out
         else:
             out = super().forward(hidden_states) + (scale * self.lora_layer(hidden_states))
-            return out
+        logging.info(f"{self.__class__.__name__}:shape={out.shape}")
+        return out

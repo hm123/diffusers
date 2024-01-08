@@ -17,6 +17,7 @@ from typing import Any, Dict, Optional
 import torch
 import torch.nn.functional as F
 from torch import nn
+import logging
 
 from ..configuration_utils import ConfigMixin, register_to_config
 from ..models.embeddings import ImagePositionalEmbeddings
@@ -452,6 +453,7 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
             output = hidden_states.reshape(
                 shape=(-1, self.out_channels, height * self.patch_size, width * self.patch_size)
             )
+        logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
 
         if not return_dict:
             return (output,)

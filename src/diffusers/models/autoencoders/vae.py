@@ -17,6 +17,7 @@ from typing import Optional, Tuple
 import numpy as np
 import torch
 import torch.nn as nn
+import logging
 
 from ...utils import BaseOutput, is_torch_version
 from ...utils.torch_utils import randn_tensor
@@ -178,6 +179,7 @@ class Encoder(nn.Module):
         sample = self.conv_norm_out(sample)
         sample = self.conv_act(sample)
         sample = self.conv_out(sample)
+        logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
 
         return sample
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from typing import Optional, Tuple
-
+import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -64,7 +64,9 @@ class Downsample1D(nn.Module):
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         assert inputs.shape[1] == self.channels
-        return self.conv(inputs)
+        ret = self.conv(inputs)
+        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        return ret
 
 
 class Downsample2D(nn.Module):
@@ -150,6 +152,8 @@ class Downsample2D(nn.Module):
                 hidden_states = self.conv(hidden_states)
         else:
             hidden_states = self.conv(hidden_states)
+
+        logging.info(f"{self.__class__.__name__}:shape={hidden_states.shape}")
 
         return hidden_states
 
@@ -287,7 +291,10 @@ class KDownsample2D(nn.Module):
         indices = torch.arange(inputs.shape[1], device=inputs.device)
         kernel = self.kernel.to(weight)[None, :].expand(inputs.shape[1], -1, -1)
         weight[indices, indices] = kernel
-        return F.conv2d(inputs, weight, stride=2)
+        ret= F.conv2d(inputs, weight, stride=2)
+        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+
+        return ret
 
 
 def downsample_2d(
