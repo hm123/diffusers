@@ -14,7 +14,8 @@
 
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
-
+import diffusers.hugo.debug as debug
+            
 import torch
 import torch.nn as nn
 
@@ -232,22 +233,26 @@ class UNet1DModel(ModelMixin, ConfigMixin):
         # 2. down
         down_block_res_samples = ()
         for downsample_block in self.down_blocks:
-            sample, res_samples = downsample_block(hidden_states=sample, temb=timestep_embed)
+            with debug.Operation("downsample_block",sample):
+                sample, res_samples = downsample_block(hidden_states=sample, temb=timestep_embed)
             down_block_res_samples += res_samples
 
         # 3. mid
         if self.mid_block:
-            sample = self.mid_block(sample, timestep_embed)
+            with debug.Operation("mid_block",sample):
+                sample = self.mid_block(sample, timestep_embed)
 
         # 4. up
         for i, upsample_block in enumerate(self.up_blocks):
             res_samples = down_block_res_samples[-1:]
             down_block_res_samples = down_block_res_samples[:-1]
-            sample = upsample_block(sample, res_hidden_states_tuple=res_samples, temb=timestep_embed)
+            with debug.Operation("upsample_block",sample):
+                sample = upsample_block(sample, res_hidden_states_tuple=res_samples, temb=timestep_embed)
 
         # 5. post-process
         if self.out_block:
-            sample = self.out_block(sample, timestep_embed)
+            with debug.Operation("out_block",sample):
+                sample = self.out_block(sample, timestep_embed)
 
         if not return_dict:
             return (sample,)
