@@ -8,7 +8,7 @@ log = []
 def logappend(message):
     log.append(message)
     print(message)
-    
+
 def log_enter():
     path = '/'.join(current_path)
     
@@ -51,6 +51,7 @@ class Operation(object):
         pass
 
     def __exit__(self, *args):
+        global current_path
         assert current_path[-1] == self.my_path
         log_exit()
         current_path = current_path[:-1]
