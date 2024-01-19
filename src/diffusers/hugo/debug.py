@@ -24,7 +24,7 @@ def log_save(fn):
 
 def log_tensor(message, tensor):
     path = '/'.join(current_path)
-    logappend(f"{path}|{message}:{tensor.shape}")
+    logappend(f"{path}|{message}:{tensor.shape if tensor is not None else 'None'}")
 
 def get_path_file():
     global current_path, save_paths
