@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from typing import Optional, Tuple
+import diffusers.hugo.debug as debug
 import logging
 import torch
 import torch.nn as nn
@@ -64,8 +65,9 @@ class Downsample1D(nn.Module):
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         assert inputs.shape[1] == self.channels
-        ret = self.conv(inputs)
-        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        with debug.Operation("conv",inputs):
+            ret = self.conv(inputs)
+            debug.log_return(ret)
         return ret
 
 
@@ -137,7 +139,8 @@ class Downsample2D(nn.Module):
         assert hidden_states.shape[1] == self.channels
 
         if self.norm is not None:
-            hidden_states = self.norm(hidden_states.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+            with debug.Operation("norm(permuted)",hidden_states):
+                hidden_states = self.norm(hidden_states.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
 
         if self.use_conv and self.padding == 0:
             pad = (0, 1, 0, 1)
@@ -147,14 +150,16 @@ class Downsample2D(nn.Module):
 
         if not USE_PEFT_BACKEND:
             if isinstance(self.conv, LoRACompatibleConv):
-                hidden_states = self.conv(hidden_states, scale)
+                with debug.Operation("conv",hidden_states):
+                    hidden_states = self.conv(hidden_states, scale)
             else:
-                hidden_states = self.conv(hidden_states)
+                with debug.Operation("conv",hidden_states):
+                    hidden_states = self.conv(hidden_states)
         else:
-            hidden_states = self.conv(hidden_states)
+            with debug.Operation("conv",hidden_states):
+                hidden_states = self.conv(hidden_states)
 
-        logging.info(f"{self.__class__.__name__}:shape={hidden_states.shape}")
-
+        debug.log_return(hidden_states)
         return hidden_states
 
 
@@ -291,8 +296,9 @@ class KDownsample2D(nn.Module):
         indices = torch.arange(inputs.shape[1], device=inputs.device)
         kernel = self.kernel.to(weight)[None, :].expand(inputs.shape[1], -1, -1)
         weight[indices, indices] = kernel
-        ret= F.conv2d(inputs, weight, stride=2)
-        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        with debug.Operation("conv",inputs):
+            ret= F.conv2d(inputs, weight, stride=2)
+            debug.log_return(ret.shape)
 
         return ret
 

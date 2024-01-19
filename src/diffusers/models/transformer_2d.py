@@ -13,6 +13,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
+import diffusers.hugo.debug as debug
 
 import torch
 import torch.nn.functional as F
@@ -453,7 +454,7 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
             output = hidden_states.reshape(
                 shape=(-1, self.out_channels, height * self.patch_size, width * self.patch_size)
             )
-        logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
+        # logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
 
         if not return_dict:
             return (output,)

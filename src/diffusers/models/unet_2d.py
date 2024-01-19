@@ -13,6 +13,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
+import diffusers.hugo.debug as debug
 
 import torch
 import torch.nn as nn
@@ -341,7 +342,7 @@ class UNet2DModel(ModelMixin, ConfigMixin):
             timesteps = timesteps.reshape((sample.shape[0], *([1] * len(sample.shape[1:]))))
             sample = sample / timesteps
 
-        logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
+        # logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
         if not return_dict:
             return (sample,)
 

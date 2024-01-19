@@ -5,17 +5,26 @@ saved_paths = {}
 save_tensors = False
 log = []
 
+def logappend(message):
+    log.append(message)
+    print(message)
+    
 def log_enter():
     path = '/'.join(current_path)
-    log.append(f"{path}|enter")
+    
+    logappend(f"{path}|enter")
 
 def log_exit():
     path = '/'.join(current_path)
-    log.append(f"{path}|exit")
+    logappend(f"{path}|exit")
 
 def log_save(fn):
     path = '/'.join(current_path)
-    log.append(f"{path}|save:{fn}")
+    logappend(f"{path}|save:{fn}")
+
+def log_tensor(message, tensor):
+    path = '/'.join(current_path)
+    logappend(f"{path}|{message}:{tensor.shape}")
 
 def get_path_file():
     global current_path, save_paths
@@ -31,6 +40,7 @@ class Operation(object):
         self.my_path = path
         current_path.append(path)
         log_enter()
+        log_tensor("enter",tensor)
         if save_tensors and tensor is not None:
             fn = get_path_file(current_path)
             f = h5py.File(fn, "w")
@@ -49,4 +59,6 @@ class Operation(object):
 def save():
     with open("debg_log.txt",'w') as file:
         file.write('\n'.join(log))
-    
+
+def log_return(tensor):
+    log_tensor("return", tensor)

@@ -13,6 +13,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 from typing import Optional, Tuple
+import diffusers.hugo.debug as debug
 
 import numpy as np
 import torch
@@ -179,7 +180,7 @@ class Encoder(nn.Module):
         sample = self.conv_norm_out(sample)
         sample = self.conv_act(sample)
         sample = self.conv_out(sample)
-        logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
+        # logging.info(f"{self.__class__.__name__}:shape={sample.shape}")
 
         return sample
 

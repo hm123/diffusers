@@ -15,6 +15,7 @@
 
 from functools import partial
 from typing import Optional, Tuple, Union
+import diffusers.hugo.debug as debug
 import logging
 import torch
 import torch.nn as nn
@@ -189,11 +190,15 @@ class ResnetBlock2D(nn.Module):
         hidden_states = input_tensor
 
         if self.time_embedding_norm == "ada_group" or self.time_embedding_norm == "spatial":
-            hidden_states = self.norm1(hidden_states, temb)
+            with debug.Operation("norm1",hidden_states):
+                hidden_states = self.norm1(hidden_states, temb)
         else:
-            hidden_states = self.norm1(hidden_states)
+            with debug.Operation("norm1",hidden_states):
+                hidden_states = self.norm1(hidden_states)
 
-        hidden_states = self.nonlinearity(hidden_states)
+        
+        with debug.Operation("nonlinearity",hidden_states):
+            hidden_states = self.nonlinearity(hidden_states)
 
         if self.upsample is not None:
             # upsample_nearest_nhwc fails with large batch sizes. see https://github.com/huggingface/diffusers/issues/984

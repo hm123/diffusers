@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from typing import Optional, Tuple
+import diffusers.hugo.debug as debug
 import logging
 import torch
 import torch.nn as nn
@@ -69,7 +70,7 @@ class Upsample1D(nn.Module):
 
         if self.use_conv:
             outputs = self.conv(outputs)
-        logging.info(f"{self.__class__.__name__}:shape={outputs.shape}")
+        # logging.info(f"{self.__class__.__name__}:shape={outputs.shape}")
 
         return outputs
 

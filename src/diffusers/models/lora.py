@@ -22,6 +22,7 @@
 ###################################################################
 
 from typing import Optional, Tuple, Union
+import diffusers.hugo.debug as debug
 
 import logging
 import torch
@@ -167,8 +168,9 @@ class PatchedLoraProjection(torch.nn.Module):
             self.lora_scale = 1.0
         if self.lora_linear_layer is None:
             return self.regular_linear_layer(input)
-        ret = self.regular_linear_layer(input) + (self.lora_scale * self.lora_linear_layer(input))
-        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        with debug.Operation("regular_linear_layer",input):
+            ret = self.regular_linear_layer(input) + (self.lora_scale * self.lora_linear_layer(input))
+            debug.log_return(ret)
         return ret
 
 
@@ -221,14 +223,15 @@ class LoRALinearLayer(nn.Module):
         orig_dtype = hidden_states.dtype
         dtype = self.down.weight.dtype
 
-        down_hidden_states = self.down(hidden_states.to(dtype))
-        up_hidden_states = self.up(down_hidden_states)
-
+        with debug.Operation("down",hidden_states):
+            down_hidden_states = self.down(hidden_states.to(dtype))
+        with debug.Operation("up",down_hidden_states):
+            up_hidden_states = self.up(down_hidden_states)
         if self.network_alpha is not None:
             up_hidden_states *= self.network_alpha / self.rank
 
         ret = up_hidden_states.to(orig_dtype)
-        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        debug.log_return(ret)
         return ret
 
 
@@ -284,14 +287,17 @@ class LoRAConv2dLayer(nn.Module):
         orig_dtype = hidden_states.dtype
         dtype = self.down.weight.dtype
 
-        down_hidden_states = self.down(hidden_states.to(dtype))
-        up_hidden_states = self.up(down_hidden_states)
+        
+        with debug.Operation("down",hidden_states):
+            down_hidden_states = self.down(hidden_states.to(dtype))
+        with debug.Operation("up",down_hidden_states):
+            up_hidden_states = self.up(down_hidden_states)
 
         if self.network_alpha is not None:
             up_hidden_states *= self.network_alpha / self.rank
 
         ret = up_hidden_states.to(orig_dtype)
-        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        debug.log_return(ret)
         return ret
 
 
@@ -363,15 +369,17 @@ class LoRACompatibleConv(nn.Conv2d):
         if self.lora_layer is None:
             # make sure to the functional Conv2D function as otherwise torch.compile's graph will break
             # see: https://github.com/huggingface/diffusers/pull/4315
-            ret = F.conv2d(
-                hidden_states, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups
-            )
+            with debug.Operation("conv2d",hidden_states):
+                ret = F.conv2d(
+                    hidden_states, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups
+                )
         else:
-            original_outputs = F.conv2d(
-                hidden_states, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups
-            )
+            with debug.Operation("conv2d",hidden_states):
+                original_outputs = F.conv2d(
+                    hidden_states, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups
+                )
             ret = original_outputs + (scale * self.lora_layer(hidden_states))
-        logging.info(f"{self.__class__.__name__}:shape={ret.shape}")
+        debug.log_return(ret)
         return ret
 
 class LoRACompatibleLinear(nn.Linear):
@@ -439,5 +447,4 @@ class LoRACompatibleLinear(nn.Linear):
             out = super().forward(hidden_states)
         else:
             out = super().forward(hidden_states) + (scale * self.lora_layer(hidden_states))
-        logging.info(f"{self.__class__.__name__}:shape={out.shape}")
         return out
