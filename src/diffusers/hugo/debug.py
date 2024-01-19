@@ -4,6 +4,7 @@ current_path = []
 saved_paths = {}
 save_tensors = False
 log = []
+remembered_tensors = {}
 
 def logappend(message):
     log.append(message)
@@ -22,9 +23,11 @@ def log_save(fn):
     path = '/'.join(current_path)
     logappend(f"{path}|save:{fn}")
 
-def log_tensor(message, tensor):
+def log_tensor(message, tensor, remember = False):
     path = '/'.join(current_path)
     logappend(f"{path}|{message}:{tensor.shape if tensor is not None else 'None'}")
+    if remember:
+        remembered_tensors[message] = tensor
 
 def get_path_file():
     global current_path, save_paths

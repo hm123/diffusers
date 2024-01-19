@@ -1109,6 +1109,7 @@ class StableDiffusionXLPipeline(
                 lora_scale=lora_scale,
                 clip_skip=self.clip_skip,
             )
+            debug.log_tensor("Prompt Embeds", prompt_embeds, remember=True)
             debug.log_return(prompt_embeds)
 
         # 4. Prepare timesteps
