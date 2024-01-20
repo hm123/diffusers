@@ -205,17 +205,21 @@ class ResnetBlock2D(nn.Module):
             if hidden_states.shape[0] >= 64:
                 input_tensor = input_tensor.contiguous()
                 hidden_states = hidden_states.contiguous()
-            input_tensor = (
-                self.upsample(input_tensor, scale=scale)
-                if isinstance(self.upsample, Upsample2D)
-                else self.upsample(input_tensor)
-            )
-            hidden_states = (
-                self.upsample(hidden_states, scale=scale)
-                if isinstance(self.upsample, Upsample2D)
-                else self.upsample(hidden_states)
-            )
+            
+            with debug.Operation("upsample",input_tensor):
+                input_tensor = (
+                    self.upsample(input_tensor, scale=scale)
+                    if isinstance(self.upsample, Upsample2D)
+                    else self.upsample(input_tensor)
+                )
+            with debug.Operation("upsample",hidden_states):
+                hidden_states = (
+                    self.upsample(hidden_states, scale=scale)
+                    if isinstance(self.upsample, Upsample2D)
+                    else self.upsample(hidden_states)
+                )
         elif self.downsample is not None:
+            #+++
             input_tensor = (
                 self.downsample(input_tensor, scale=scale)
                 if isinstance(self.downsample, Downsample2D)
@@ -261,7 +265,7 @@ class ResnetBlock2D(nn.Module):
             )
 
         output_tensor = (input_tensor + hidden_states) / self.output_scale_factor
-        logging.info(f"{self.__class__.__name__}:shape={output_tensor.shape}")
+        #logging.info(f"{self.__class__.__name__}:shape={output_tensor.shape}")
 
         return output_tensor
 

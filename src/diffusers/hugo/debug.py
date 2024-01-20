@@ -1,4 +1,9 @@
 import h5py
+from inspect import getframeinfo, stack
+
+def debuginfo():
+    caller = getframeinfo(stack()[1][0])
+    return f"{caller.filename}:{caller.lineno}"
 
 current_path = []
 saved_paths = {}
@@ -10,10 +15,10 @@ def logappend(message):
     log.append(message)
     print(message)
 
-def log_enter():
+def log_enter(caller):
     path = '/'.join(current_path)
     
-    logappend(f"{path}|enter")
+    logappend(f"{path}|enter={caller}")
 
 def log_exit():
     path = '/'.join(current_path)
@@ -44,9 +49,10 @@ def get_path_file():
 class Operation(object):
     my_path:str
     def __init__(self, path, tensor):
+        caller = debuginfo()
         self.my_path = path
         current_path.append(path)
-        log_enter()
+        log_enter(caller)_
         log_tensor("enter",tensor)
         if save_tensors and tensor is not None:
             fn = get_path_file(current_path)
