@@ -1,6 +1,7 @@
 import h5py
 from inspect import getframeinfo, stack
-    
+
+allow_2_0 = True    
 
 current_path = []
 saved_paths = {}

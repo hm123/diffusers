@@ -207,7 +207,7 @@ class Attention(nn.Module):
         # but only if it has the default `scale` argument. TODO remove scale_qk check when we move to torch 2.1
         if processor is None:
             processor = (
-                AttnProcessor2_0() if hasattr(F, "scaled_dot_product_attention") and self.scale_qk else AttnProcessor()
+                AttnProcessor2_0() if hasattr(F, "scaled_dot_product_attention") and self.scale_qk and debug.allow_2_0 else AttnProcessor()
             )
         self.set_processor(processor)
 
@@ -339,7 +339,7 @@ class Attention(nn.Module):
                 # but only if it has the default `scale` argument. TODO remove scale_qk check when we move to torch 2.1
                 processor = (
                     AttnProcessor2_0()
-                    if hasattr(F, "scaled_dot_product_attention") and self.scale_qk
+                    if hasattr(F, "scaled_dot_product_attention") and self.scale_qk and debug.allow_2_0
                     else AttnProcessor()
                 )
 
@@ -368,7 +368,9 @@ class Attention(nn.Module):
             # torch.nn.functional.scaled_dot_product_attention for native Flash/memory_efficient_attention
             # but only if it has the default `scale` argument. TODO remove scale_qk check when we move to torch 2.1
             processor = (
-                AttnProcessor2_0() if hasattr(F, "scaled_dot_product_attention") and self.scale_qk else AttnProcessor()
+                AttnProcessor2_0() if hasattr(F, "scaled_dot_product_attention") and self.scale_qk
+                and debug.allow_2_0
+                else AttnProcessor()
             )
 
         self.set_processor(processor)
@@ -1950,7 +1952,7 @@ class LoRAAttnProcessor2_0(nn.Module):
         attn.to_out[0].lora_layer = self.to_out_lora.to(hidden_states.device)
 
         attn._modules.pop("processor")
-        attn.processor = AttnProcessor2_0()
+        attn.processor = AttnProcessor2_0() if debug.allow_2_0 else AttnProcessor()
         return attn.processor(attn, hidden_states, *args, **kwargs)
 
 
