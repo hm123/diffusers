@@ -1,9 +1,9 @@
 import h5py
-from inspect import getframeinfo, stack
+#from inspect import getframeinfo, stack
 
-def debuginfo():
-    caller = getframeinfo(stack()[1][0])
-    return f"{caller.filename}:{caller.lineno}"
+# def debuginfo():
+#     caller = getframeinfo(stack()[1][0])
+#     return f"{caller.filename}:{caller.lineno}"
 
 current_path = []
 saved_paths = {}
@@ -49,7 +49,7 @@ def get_path_file():
 class Operation(object):
     my_path:str
     def __init__(self, path, tensor):
-        caller = debuginfo()
+        caller = '?' # debuginfo()
         self.my_path = path
         current_path.append(path)
         log_enter(caller)_
