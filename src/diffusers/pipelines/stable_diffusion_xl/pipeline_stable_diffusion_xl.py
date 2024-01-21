@@ -1204,7 +1204,7 @@ class StableDiffusionXLPipeline(
         self._num_timesteps = len(timesteps)
         with self.progress_bar(total=num_inference_steps) as progress_bar:
             for i, t in enumerate(timesteps):
-                with debug.Operation(f"step{i}",latent_model_input):
+                with debug.Operation(f"step{i}",latents):
                     if self.interrupt:
                         continue
 
