@@ -26,7 +26,13 @@ def log_save(fn):
     logappend(f"{path}|save:{fn}")
 
 callback = None
+callback_attention = None
+def log_attention(query, key, value, output):
+    path = '/'.join(current_path)
+    if callback_attention is not None:
+        callback_attention(path, query, key, value, output)
 
+    
 def log_tensor(message, tensor, remember = False):
     path = '/'.join(current_path)
     logappend(f"{path}|{message}:{tensor.shape if tensor is not None else 'None'}")
