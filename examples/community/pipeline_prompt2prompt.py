@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-
+from diffusers.hugo import debug
 import abc
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -330,6 +330,7 @@ class P2PCrossAttnProcessor:
         value = attn.head_to_batch_dim(value)
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", attention_probs)
 
         # one line change
         self.controller(attention_probs, is_cross, self.place_in_unet)

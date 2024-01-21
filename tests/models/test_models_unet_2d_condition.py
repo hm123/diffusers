@@ -19,7 +19,7 @@ import os
 import tempfile
 import unittest
 from collections import OrderedDict
-
+from diffusers.hugo import debug
 import torch
 from parameterized import parameterized
 from pytest import mark
@@ -534,6 +534,8 @@ class UNet2DConditionModelTests(ModelTesterMixin, UNetTesterMixin, unittest.Test
                 value = attn.head_to_batch_dim(value)
 
                 attention_probs = attn.get_attention_scores(query, key, attention_mask)
+                debug.log_tensor("attention_probs", self.attention_probs)
+
                 hidden_states = torch.bmm(attention_probs, value)
                 hidden_states = attn.batch_to_head_dim(hidden_states)
 

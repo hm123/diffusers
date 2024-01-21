@@ -21,6 +21,7 @@ import math
 import warnings
 from collections.abc import Iterable
 from typing import Any, Callable, Dict, List, Optional, Union
+from diffusers.hugo import debug
 
 import torch
 import torch.nn.functional as F
@@ -212,6 +213,7 @@ class AttnProcessorWithHook(AttnProcessor2_0):
             key_batch_dim = attn.head_to_batch_dim(key)
             value_batch_dim = attn.head_to_batch_dim(value)
             attention_probs = attn.get_attention_scores(query_batch_dim, key_batch_dim, attention_mask)
+            debug.log_tensor("attention_probs", attention_probs)            
 
         if self.hook is not None and self.enabled:
             # Call the hook with query, key, value, and attention maps

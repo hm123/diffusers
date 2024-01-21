@@ -2,7 +2,7 @@ import copy
 import inspect
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
+from diffusers.hugo import debug
 import numpy as np
 import PIL
 import torch
@@ -121,6 +121,7 @@ class CrossFrameAttnProcessor:
         value = attn.head_to_batch_dim(value)
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", attention_probs)
         hidden_states = torch.bmm(attention_probs, value)
         hidden_states = attn.batch_to_head_dim(hidden_states)
 

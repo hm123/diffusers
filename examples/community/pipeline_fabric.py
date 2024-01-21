@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List, Optional, Union
-
+from diffusers.hugo import debug
 import torch
 from packaging import version
 from PIL import Image
@@ -94,6 +94,7 @@ class FabricCrossAttnProcessor:
         value = attn.head_to_batch_dim(value)
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", attention_probs)
 
         if weights is not None:
             if weights.shape[0] != 1:

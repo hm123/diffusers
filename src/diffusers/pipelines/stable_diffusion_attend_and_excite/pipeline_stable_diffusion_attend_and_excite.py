@@ -15,7 +15,7 @@
 import inspect
 import math
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
+from diffusers.hugo import debug
 import numpy as np
 import torch
 from torch.nn import functional as F
@@ -154,7 +154,7 @@ class AttendExciteAttnProcessor:
         value = attn.head_to_batch_dim(value)
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
-
+        debug.log_tensor("attention_probs", attention_probs)
         # only need to store attention maps during the Attend and Excite process
         if attention_probs.requires_grad:
             self.attnstore(attention_probs, is_cross, self.place_in_unet)

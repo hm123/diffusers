@@ -14,7 +14,7 @@
 
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Union
-
+from diffusers.hugo import debug
 import torch
 import torch.nn.functional as F
 from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection
@@ -86,6 +86,7 @@ class CrossAttnStoreProcessor:
         value = attn.head_to_batch_dim(value)
 
         self.attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", self.attention_probs)
         hidden_states = torch.bmm(self.attention_probs, value)
         hidden_states = attn.batch_to_head_dim(hidden_states)
 
