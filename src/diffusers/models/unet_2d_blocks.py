@@ -2354,6 +2354,7 @@ class CrossAttnUpBlock2D(nn.Module):
             and getattr(self, "b2", None)
         )
 
+        count = 0
         for resnet, attn in zip(self.resnets, self.attentions):
             # pop res hidden states
             res_hidden_states = res_hidden_states_tuple[-1]
@@ -2400,9 +2401,9 @@ class CrossAttnUpBlock2D(nn.Module):
                     return_dict=False,
                 )[0]
             else:
-                with debug.Operation("resnet",hidden_states): 
+                with debug.Operation(f"resnet_{count}",hidden_states): 
                     hidden_states = resnet(hidden_states, temb, scale=lora_scale)
-                with debug.Operation("attn",hidden_states): 
+                with debug.Operation(f"attn_{count}",hidden_states): 
                     hidden_states = attn(
                         hidden_states,
                         encoder_hidden_states=encoder_hidden_states,
@@ -2411,6 +2412,7 @@ class CrossAttnUpBlock2D(nn.Module):
                         encoder_attention_mask=encoder_attention_mask,
                         return_dict=False,
                     )[0]
+            count += 1
 
         if self.upsamplers is not None:
             for upsampler in self.upsamplers:

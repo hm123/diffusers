@@ -13,7 +13,7 @@
 # limitations under the License.
 from importlib import import_module
 from typing import Callable, Optional, Union
-
+from diffusers.hugo import debug
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -598,6 +598,8 @@ class Attention(nn.Module):
             attention_scores = attention_scores.float()
 
         attention_probs = attention_scores.softmax(dim=-1)
+        debug.log_tensor("attention_probs", attention_probs)
+        
         del attention_scores
 
         attention_probs = attention_probs.to(dtype)
@@ -757,6 +759,7 @@ class AttnProcessor:
         value = attn.head_to_batch_dim(value)
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", attention_probs)
         hidden_states = torch.bmm(attention_probs, value)
         hidden_states = attn.batch_to_head_dim(hidden_states)
 
@@ -863,6 +866,7 @@ class CustomDiffusionAttnProcessor(nn.Module):
         value = attn.head_to_batch_dim(value)
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", attention_probs)
         hidden_states = torch.bmm(attention_probs, value)
         hidden_states = attn.batch_to_head_dim(hidden_states)
 
@@ -930,6 +934,7 @@ class AttnAddedKVProcessor:
             value = encoder_hidden_states_value_proj
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", attention_probs)
         hidden_states = torch.bmm(attention_probs, value)
         hidden_states = attn.batch_to_head_dim(hidden_states)
 
@@ -2163,6 +2168,7 @@ class IPAdapterAttnProcessor(nn.Module):
         value = attn.head_to_batch_dim(value)
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", attention_probs)
         hidden_states = torch.bmm(attention_probs, value)
         hidden_states = attn.batch_to_head_dim(hidden_states)
 
@@ -2174,6 +2180,8 @@ class IPAdapterAttnProcessor(nn.Module):
         ip_value = attn.head_to_batch_dim(ip_value)
 
         ip_attention_probs = attn.get_attention_scores(query, ip_key, None)
+        debug.log_tensor("ip_attention_probs", ip_attention_probs)
+        
         ip_hidden_states = torch.bmm(ip_attention_probs, ip_value)
         ip_hidden_states = attn.batch_to_head_dim(ip_hidden_states)
 
