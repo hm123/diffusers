@@ -13,7 +13,7 @@
 # limitations under the License.
 import math
 from typing import Optional, Tuple, Union
-
+from diffusers.hugo import debug
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -354,6 +354,7 @@ class SelfAttention1d(nn.Module):
 
         attention_scores = torch.matmul(query_states * scale, key_states.transpose(-1, -2) * scale)
         attention_probs = torch.softmax(attention_scores, dim=-1)
+        debug.log_tensor("attention_probs", attention_probs)
 
         # compute attention output
         hidden_states = torch.matmul(attention_probs, value_states)

@@ -14,7 +14,7 @@
 
 import functools
 import math
-
+from diffusers.hugo import debug
 import flax.linen as nn
 import jax
 import jax.numpy as jnp
@@ -227,7 +227,7 @@ class FlaxAttention(nn.Module):
 
             attention_scores = attention_scores * self.scale
             attention_probs = nn.softmax(attention_scores, axis=-1 if self.split_head_dim else 2)
-
+            debug.log_tensor("attention_probs", attention_probs)
             # attend to values
             if self.split_head_dim:
                 hidden_states = jnp.einsum("b n f t, b t n h -> b f n h", attention_probs, value_states)

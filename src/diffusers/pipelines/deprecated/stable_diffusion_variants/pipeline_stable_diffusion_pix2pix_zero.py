@@ -15,7 +15,7 @@
 import inspect
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Union
-
+from diffusers.hugo import debug
 import numpy as np
 import PIL.Image
 import torch
@@ -260,6 +260,7 @@ class Pix2PixZeroAttnProcessor:
         value = attn.head_to_batch_dim(value)
 
         attention_probs = attn.get_attention_scores(query, key, attention_mask)
+        debug.log_tensor("attention_probs", attention_probs)
         if self.is_pix2pix_zero and timestep is not None:
             # new bookkeeping to save the attention weights.
             if loss is None:
