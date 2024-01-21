@@ -1250,7 +1250,8 @@ class AttnProcessor2_0:
         hidden_states = F.scaled_dot_product_attention(
             query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
         )
-
+        debug.log_attention(query, key, value, hidden_states)
+        
         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
         hidden_states = hidden_states.to(query.dtype)
 
@@ -1347,7 +1348,7 @@ class FusedAttnProcessor2_0:
         hidden_states = F.scaled_dot_product_attention(
             query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
         )
-
+        debug.log_attention(query, key, value, hidden_states)
         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
         hidden_states = hidden_states.to(query.dtype)
 
@@ -1579,7 +1580,7 @@ class CustomDiffusionAttnProcessor2_0(nn.Module):
         hidden_states = F.scaled_dot_product_attention(
             query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
         )
-
+        debug.log_attention(query, key, value, hidden_states)
         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
         hidden_states = hidden_states.to(query.dtype)
 
@@ -2300,7 +2301,7 @@ class IPAdapterAttnProcessor2_0(torch.nn.Module):
         hidden_states = F.scaled_dot_product_attention(
             query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
         )
-
+        debug.log_attention(query, key, value, hidden_states)
         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
         hidden_states = hidden_states.to(query.dtype)
 
@@ -2316,7 +2317,7 @@ class IPAdapterAttnProcessor2_0(torch.nn.Module):
         ip_hidden_states = F.scaled_dot_product_attention(
             query, ip_key, ip_value, attn_mask=None, dropout_p=0.0, is_causal=False
         )
-
+        debug.log_attention(query, ip_key, ip_value, ip_hidden_states)
         ip_hidden_states = ip_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
         ip_hidden_states = ip_hidden_states.to(query.dtype)
 

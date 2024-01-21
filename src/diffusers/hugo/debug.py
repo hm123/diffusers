@@ -29,6 +29,7 @@ callback = None
 callback_attention = None
 def log_attention(query, key, value, output):
     path = '/'.join(current_path)
+    logappend(f"{path}|ATTENTION!!!:{output.shape}")
     if callback_attention is not None:
         callback_attention(path, query, key, value, output)
 
